@@ -25,7 +25,7 @@ class IdeaBoardController extends Controller
             ->first()
             ?? NicheCandidate::where('slug', 'electric-vehicles')->first();
 
-        if (!$selectedNiche) {
+        if (! $selectedNiche) {
             $selectedNiche = NicheCandidate::firstOrFail();
         }
 
@@ -162,4 +162,3 @@ class IdeaBoardController extends Controller
         return back()->with('success', "Status Research Dossier #{$dossier->id} diubah menjadi '{$newStatus}'.");
     }
 }
-

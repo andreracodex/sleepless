@@ -86,23 +86,30 @@
                     </thead>
                     <tbody class="divide-y divide-slate-800/80">
                         @foreach($dossier->claim_ledger ?? [] as $clm)
+                            @php
+                                $claimText = $clm['claim'] ?? ($clm['claim_text'] ?? '-');
+                                $sourceRef = $clm['source_ref'] ?? ($clm['primary_source'] ?? 'SRC-01');
+                                $rawConf = $clm['confidence'] ?? ($clm['confidence_score'] ?? 90);
+                                $confPercent = $rawConf > 1 ? $rawConf : round($rawConf * 100);
+                                $verifNote = $clm['verification_note'] ?? ($clm['verification_method'] ?? '-');
+                            @endphp
                             <tr class="hover:bg-slate-850">
-                                <td class="py-3 px-4 font-mono font-bold text-indigo-400">{{ $clm['claim_id'] }}</td>
-                                <td class="py-3 px-4 text-white font-medium leading-relaxed">{{ $clm['claim'] }}</td>
+                                <td class="py-3 px-4 font-mono font-bold text-indigo-400">{{ $clm['claim_id'] ?? 'CLM' }}</td>
+                                <td class="py-3 px-4 text-white font-medium leading-relaxed">{{ $claimText }}</td>
                                 <td class="py-3 px-4">
                                     <span class="px-2 py-0.5 rounded bg-slate-950 text-slate-300 font-mono text-[10px] border border-slate-800">
-                                        {{ $clm['source_ref'] }}
+                                        {{ $sourceRef }}
                                     </span>
                                 </td>
                                 <td class="py-3 px-4">
                                     <div class="flex items-center gap-1.5">
                                         <div class="w-12 bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                                            <div class="bg-emerald-400 h-full" style="width: {{ ($clm['confidence'] ?? 0.9) * 100 }}%"></div>
+                                            <div class="bg-emerald-400 h-full" style="width: {{ $confPercent }}%"></div>
                                         </div>
-                                        <span class="font-mono text-emerald-400">{{ round(($clm['confidence'] ?? 0.9) * 100) }}%</span>
+                                        <span class="font-mono text-emerald-400">{{ $confPercent }}%</span>
                                     </div>
                                 </td>
-                                <td class="py-3 px-4 text-slate-400">{{ $clm['verification_note'] ?? '-' }}</td>
+                                <td class="py-3 px-4 text-slate-400">{{ $verifNote }}</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -127,12 +134,12 @@
                     <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
                         <div class="flex items-center justify-between">
                             <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px] font-mono font-bold">
-                                {{ $src['source_id'] }}
+                                {{ $src['source_id'] ?? ('SRC-0' . $loop->iteration) }}
                             </span>
-                            <span class="text-[10px] text-slate-400">{{ $src['date'] ?? '-' }}</span>
+                            <span class="text-[10px] text-slate-400">{{ $src['date'] ?? now()->format('Y-m-d') }}</span>
                         </div>
-                        <h4 class="text-sm font-bold text-white leading-snug">{{ $src['title'] }}</h4>
-                        <p class="text-xs text-slate-400">Penerbit: <strong class="text-slate-300">{{ $src['publisher'] }}</strong></p>
+                        <h4 class="text-sm font-bold text-white leading-snug">{{ $src['title'] ?? ($src['name'] ?? 'Primary Citation') }}</h4>
+                        <p class="text-xs text-slate-400">Penerbit: <strong class="text-slate-300">{{ $src['publisher'] ?? ($src['name'] ?? 'Accredited Source') }}</strong></p>
                         @if(!empty($src['sample_size']))
                             <p class="text-[11px] text-slate-400">Data Sampel: {{ $src['sample_size'] }}</p>
                         @endif

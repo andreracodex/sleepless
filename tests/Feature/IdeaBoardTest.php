@@ -122,5 +122,11 @@ class IdeaBoardTest extends TestCase
         $response->assertSee('Sleep Content');
         $response->assertSee('Terhubung ke Niche:');
         $response->assertSee('8 Hours Deep Ocean Rain');
+
+        // Test Dossier page of the dynamically generated idea renders without errors
+        $sleepIdea = ContentIdea::where('niche_candidate_id', $sleep->id)->firstOrFail();
+        $dossierResponse = $this->get(route('ideas.dossier', $sleepIdea->id));
+        $dossierResponse->assertStatus(200);
+        $dossierResponse->assertSee('Data shows significant industry growth');
     }
 }
