@@ -49,6 +49,9 @@
             </div>
 
             <div class="flex items-center space-x-3">
+                <a href="{{ route('scripts.show', $idea->id) }}" class="text-xs px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition flex items-center gap-1.5 shadow">
+                    <span>🎬 Buka Script Studio →</span>
+                </a>
                 <a href="{{ route('ideas.index') }}" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition border border-slate-700">
                     ← Kembali ke Idea Board
                 </a>
