@@ -57,9 +57,11 @@ class VideoRenderingService
         ]);
 
         $renderScript = base_path('scripts/render_video.py');
-        $command = "python \"{$renderScript}\" \"{$manifestPath}\" \"{$fullMp4Path}\" \"{$fullThumbPath}\"";
+        $pythonBinary = \App\Support\PythonBinary::getPath();
 
-        $result = Process::path(base_path())->timeout(180)->run($command);
+        $result = Process::path(base_path())
+            ->timeout(180)
+            ->run([$pythonBinary, $renderScript, $manifestPath, $fullMp4Path, $fullThumbPath]);
 
         if (file_exists($manifestPath)) {
             unlink($manifestPath);

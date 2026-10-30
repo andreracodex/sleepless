@@ -147,9 +147,11 @@ class ScriptGenerationService
         file_put_contents($tmpTextFile, $narration);
 
         $scriptPath = base_path('scripts/generate_audio.py');
-        $command = "python \"{$scriptPath}\" \"{$tmpTextFile}\" \"{$fullMp3Path}\" \"{$fullSrtPath}\" \"{$voice}\"";
+        $pythonBinary = \App\Support\PythonBinary::getPath();
 
-        $result = Process::path(base_path())->timeout(90)->run($command);
+        $result = Process::path(base_path())
+            ->timeout(90)
+            ->run([$pythonBinary, $scriptPath, $tmpTextFile, $fullMp3Path, $fullSrtPath, $voice]);
 
         if (file_exists($tmpTextFile)) {
             unlink($tmpTextFile);

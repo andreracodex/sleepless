@@ -21,11 +21,11 @@ class CollabPalsCaptureService
         $cleanQuery = preg_replace('/\s*\(.*?\)\s*/', '', $query);
 
         $scriptPath = base_path('scripts/capture_collabpals.py');
-        $command = "python \"{$scriptPath}\" \"{$cleanQuery}\"";
+        $pythonBinary = \App\Support\PythonBinary::getPath();
 
         $result = Process::path(base_path())
             ->timeout(60)
-            ->run($command);
+            ->run([$pythonBinary, $scriptPath, $cleanQuery]);
 
         $output = $result->output();
 
