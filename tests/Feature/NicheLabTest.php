@@ -259,6 +259,7 @@ class NicheLabTest extends TestCase
         $response->assertSee('id="tableView"', false);
         $response->assertSee('id="gridView"', false);
         $response->assertSee('🎯 Pilih Niche', false);
+        $response->assertSee('Sync to CollabPals');
 
         // Filter by keyword search
         $searchResponse = $this->get(route('niches.index', ['search' => 'Cybersecurity']));
@@ -274,6 +275,20 @@ class NicheLabTest extends TestCase
         $selectResponse = $this->post(route('niches.select', $cyber->id));
         $selectResponse->assertRedirect();
         $this->assertEquals('selected', $cyber->fresh()->status);
+    }
+
+    public function test_creator_can_trigger_collabpals_sync(): void
+    {
+        \Illuminate\Support\Facades\Artisan::shouldReceive('call')
+            ->with('niche:sync-all', ['--fresh' => true])
+            ->once();
+
+        $response = $this->post(route('niches.sync'));
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $log = AuditLog::where('action', 'sync_collabpals_directory')->first();
+        $this->assertNotNull($log);
     }
 }
 

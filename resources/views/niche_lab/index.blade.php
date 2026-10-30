@@ -9,10 +9,13 @@
     <a href="{{ route('ideas.index') }}" class="text-xs px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition flex items-center gap-1.5 shadow">
         <span>💡 Idea Board →</span>
     </a>
-    <a href="https://www.collabpals.com/tools/youtube-niche-finder" target="_blank" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition flex items-center gap-1.5 border border-slate-700">
-        <span>Source: CollabPals</span>
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-    </a>
+    <form action="{{ route('niches.sync') }}" method="POST" id="syncForm" onsubmit="const btn = this.querySelector('button'); btn.disabled = true; btn.classList.add('opacity-75'); btn.innerHTML = '<span class=\'animate-spin\'>🔄</span><span>Mengambil data...</span>';">
+        @csrf
+        <button type="submit" class="text-xs px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-semibold transition flex items-center gap-1.5 border border-slate-700 shadow-sm" title="Jalankan sinkronisasi scraper untuk mengambil data live terbaru 200+ niche dari CollabPals">
+            <span class="text-indigo-400">🔄</span>
+            <span>Sync to CollabPals</span>
+        </button>
+    </form>
 @endsection
 
 @section('content')
@@ -52,7 +55,7 @@
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800 pb-5">
             <div>
                 <h3 class="text-lg font-extrabold text-white flex items-center gap-2">
-                    <span>📚 Katalog Niche YouTube (CollabPals 2026 Directory)</span>
+                    <span>📚 Katalog Niche YouTube (Hits 2026)</span>
                     <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                         {{ $allNiches->total() }} Niche Tersedia
                     </span>

@@ -11,20 +11,22 @@ use Illuminate\Support\Facades\Process;
 class SyncCollabPalsNichesCommand extends Command
 {
     protected $signature = 'niche:sync-all {--fresh : Re-scrape live directory from CollabPals}';
+
     protected $description = 'Import and synchronize all 200+ niches from CollabPals YouTube Niche Finder';
 
     public function handle(): int
     {
         $jsonPath = storage_path('app/collabpals_all_niches.json');
 
-        if ($this->option('fresh') || !file_exists($jsonPath)) {
-            $this->info("Running CollabPals live scraper worker...");
+        if ($this->option('fresh') || ! file_exists($jsonPath)) {
+            $this->info('Running CollabPals live scraper worker...');
             $python = PythonBinary::getPath();
             $script = base_path('scripts/scrape_collabpals_directory.py');
 
             $result = Process::path(base_path())->timeout(90)->run([$python, $script]);
-            if (!$result->successful() || !file_exists($jsonPath)) {
-                $this->error("Failed to scrape CollabPals directory: " . $result->errorOutput() . " " . $result->output());
+            if (! $result->successful() || ! file_exists($jsonPath)) {
+                $this->error('Failed to scrape CollabPals directory: '.$result->errorOutput().' '.$result->output());
+
                 return self::FAILURE;
             }
         }
@@ -32,12 +34,13 @@ class SyncCollabPalsNichesCommand extends Command
         $rawJson = file_get_contents($jsonPath);
         $niches = json_decode($rawJson, true);
 
-        if (!is_array($niches) || empty($niches)) {
-            $this->error("Invalid or empty CollabPals JSON database.");
+        if (! is_array($niches) || empty($niches)) {
+            $this->error('Invalid or empty CollabPals JSON database.');
+
             return self::FAILURE;
         }
 
-        $this->info("Found " . count($niches) . " niches in CollabPals database. Importing to database...");
+        $this->info('Found '.count($niches).' niches in CollabPals database. Importing to database...');
 
         $createdCount = 0;
         $updatedCount = 0;
@@ -56,7 +59,7 @@ class SyncCollabPalsNichesCommand extends Command
 
             $candidate = NicheCandidate::where('slug', $slug)->first();
 
-            if (!$candidate) {
+            if (! $candidate) {
                 // If it's Electric Vehicles, let's keep it consistent
                 $isEv = str_contains(strtolower($name), 'electric vehicle');
                 $isSleep = str_contains(strtolower($name), 'sleep');
@@ -72,7 +75,7 @@ class SyncCollabPalsNichesCommand extends Command
                         'views_per_1k' => $viewsPer1k,
                         'equipment' => $item['equipment'] ?? 'Basic',
                     ],
-                    'content_pillars' => !empty($formats) ? $formats : ['Explainer', 'Guides', 'Industry Updates'],
+                    'content_pillars' => ! empty($formats) ? $formats : ['Explainer', 'Guides', 'Industry Updates'],
                 ]);
                 $createdCount++;
             } else {
@@ -98,13 +101,14 @@ class SyncCollabPalsNichesCommand extends Command
                         'equipment_level' => $item['equipment'] ?? 'Basic',
                         'verification_status' => 'verified',
                         'captured_at' => now(),
-                        'notes' => "CollabPals 2026 Directory: Category {$category}",
+                        'notes' => "Category {$category}",
                     ]
                 );
             }
         }
 
         $this->info("Sync completed! Created {$createdCount} new niches, updated {$updatedCount} existing niches.");
+
         return self::SUCCESS;
     }
 }

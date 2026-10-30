@@ -8,6 +8,7 @@ use App\Models\NicheEvaluation;
 use App\Models\NicheScoreSnapshot;
 use App\Services\CollabPalsCaptureService;
 use App\Services\NicheEvaluationService;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -119,6 +120,30 @@ class NicheLabController extends Controller
             'recentSnapshots',
             'auditLogs'
         ));
+    }
+
+    /**
+     * Trigger synchronization to fetch latest data for all niches from CollabPals
+     */
+    public function syncAll(Request $request): RedirectResponse
+    {
+        @set_time_limit(120);
+
+        try {
+            Artisan::call('niche:sync-all', ['--fresh' => true]);
+
+            AuditLog::log(
+                action: 'sync_collabpals_directory',
+                entityType: 'NicheCandidate',
+                entityId: 0,
+                after: ['synced_at' => now()->toDateTimeString()],
+                actorType: 'creator'
+            );
+
+            return back()->with('success', "Sinkronisasi berhasil! Seluruh data 200+ niche telah diperbarui dengan data live terbaru dari CollabPals.");
+        } catch (\Exception $e) {
+            return back()->with('error', "Gagal melakukan sinkronisasi CollabPals: " . $e->getMessage());
+        }
     }
 
     /**
