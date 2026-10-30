@@ -62,16 +62,24 @@
                 </button>
             </div>
 
+            @php
+                $activePilotNiche = \App\Models\NicheCandidate::with('latestVerifiedSnapshot')->where('status', 'selected')->first();
+                $channel = \App\Models\Channel::first();
+            @endphp
             <!-- Active Channel Badge -->
             <div class="p-4 mx-3 my-3 rounded-xl bg-slate-800/70 border border-slate-700/60 shadow-sm">
                 <div class="flex items-center justify-between">
                     <span class="text-[9px] uppercase font-bold tracking-wider text-cyan-400">⚡ Active Pilot Channel</span>
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 </div>
-                <div class="font-bold text-xs text-white mt-1 truncate">VoltWise: The EV Explainer</div>
+                <div class="font-bold text-xs text-white mt-1 truncate">
+                    {{ $activePilotNiche ? $activePilotNiche->name : ($channel->name ?? 'VoltWise: The EV Explainer') }}
+                </div>
                 <div class="flex items-center justify-between text-[10px] text-slate-400 mt-0.5">
-                    <span>@VoltWiseEV</span>
-                    <span class="text-emerald-400 font-semibold">Verified Score: 78</span>
+                    <span>{{ $channel->handle ?? '@VoltWiseEV' }}</span>
+                    <span class="text-emerald-400 font-semibold">
+                        Score: {{ $activePilotNiche?->latestVerifiedSnapshot?->niche_score ?? 78 }}
+                    </span>
                 </div>
             </div>
 

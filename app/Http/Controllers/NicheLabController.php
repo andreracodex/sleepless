@@ -21,9 +21,9 @@ class NicheLabController extends Controller
     ) {}
 
     /**
-     * Display Niche Lab comparison dashboard
+     * Display Niche Lab comparison dashboard & full CollabPals directory
      */
-    public function index(): View
+    public function index(Request $request): View
     {
         $ev = NicheCandidate::with(['latestVerifiedSnapshot', 'latestSnapshot', 'latestEvaluation'])
             ->where('slug', 'electric-vehicles')
@@ -35,6 +35,71 @@ class NicheLabController extends Controller
 
         $comparison = $this->evaluationService->compare($ev, $sleep);
 
+        // Active selected pilot niche
+        $selectedNiche = NicheCandidate::with(['latestVerifiedSnapshot', 'latestSnapshot', 'latestEvaluation'])
+            ->where('status', 'selected')
+            ->first() ?? $ev;
+
+        // Query all niche candidates for creator directory
+        $query = NicheCandidate::with(['latestVerifiedSnapshot', 'latestSnapshot']);
+
+        // Search filter (keyword in name, description, slug)
+        if ($search = trim((string) $request->input('search'))) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('slug', 'like', "%{$search}%");
+            });
+        }
+
+        // Category filter
+        if ($category = $request->input('category')) {
+            $query->where('audience_profile->category', $category);
+        }
+
+        // Faceless friendly filter
+        if ($request->has('faceless') && $request->input('faceless') !== '' && $request->input('faceless') !== null) {
+            $facelessVal = (bool) $request->input('faceless');
+            $query->whereHas('latestVerifiedSnapshot', function ($q) use ($facelessVal) {
+                $q->where('faceless_friendly', $facelessVal);
+            });
+        }
+
+        // Sorting
+        $sort = $request->input('sort', 'score_desc');
+        if ($sort === 'score_desc') {
+            $sub = NicheScoreSnapshot::select('niche_score')
+                ->whereColumn('niche_candidate_id', 'niche_candidates.id')
+                ->where('verification_status', 'verified')
+                ->latest('captured_at')
+                ->limit(1);
+            $query->orderByDesc($sub);
+        } elseif ($sort === 'score_asc') {
+            $sub = NicheScoreSnapshot::select('niche_score')
+                ->whereColumn('niche_candidate_id', 'niche_candidates.id')
+                ->where('verification_status', 'verified')
+                ->latest('captured_at')
+                ->limit(1);
+            $query->orderBy($sub);
+        } elseif ($sort === 'name_asc') {
+            $query->orderBy('name', 'asc');
+        } else {
+            $query->orderByDesc('status')->orderBy('name', 'asc');
+        }
+
+        $perPage = $request->input('per_page', 24);
+        if ($perPage === 'all') {
+            $allNiches = $query->paginate(250)->withQueryString();
+        } else {
+            $allNiches = $query->paginate((int) $perPage)->withQueryString();
+        }
+
+        $categories = [
+            'Finance', 'Technology', 'Education', 'Automotive', 'Hobby', 
+            'DIY', 'Lifestyle', 'Sports', 'Gaming', 'Food', 
+            'Fitness', 'Beauty', 'Music', 'Travel', 'True Crime', 'ASMR'
+        ];
+
         $recentSnapshots = NicheScoreSnapshot::with('nicheCandidate')
             ->latest('captured_at')
             ->limit(10)
@@ -44,7 +109,16 @@ class NicheLabController extends Controller
             ->limit(10)
             ->get();
 
-        return view('niche_lab.index', compact('ev', 'sleep', 'comparison', 'recentSnapshots', 'auditLogs'));
+        return view('niche_lab.index', compact(
+            'ev',
+            'sleep',
+            'comparison',
+            'selectedNiche',
+            'allNiches',
+            'categories',
+            'recentSnapshots',
+            'auditLogs'
+        ));
     }
 
     /**

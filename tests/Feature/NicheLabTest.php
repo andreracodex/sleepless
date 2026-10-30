@@ -227,5 +227,50 @@ class NicheLabTest extends TestCase
         $this->assertEquals('NicheCandidate', $log->entity_type);
         $this->assertEquals($ev->id, $log->entity_id);
     }
+
+    public function test_niche_lab_displays_all_niches_catalog_and_filters(): void
+    {
+        // Create an additional candidate with category
+        $cyber = NicheCandidate::create([
+            'slug' => 'cybersecurity',
+            'name' => 'Cybersecurity',
+            'description' => 'Security tutorials and ethical hacking',
+            'status' => 'candidate',
+            'audience_profile' => ['category' => 'Technology'],
+        ]);
+
+        NicheScoreSnapshot::create([
+            'niche_candidate_id' => $cyber->id,
+            'source_name' => 'CollabPals',
+            'source_url' => 'https://collabpals.com',
+            'matched_query' => 'Cybersecurity',
+            'source_niche_name' => 'Cybersecurity',
+            'niche_score' => 80,
+            'cpm_range' => '$8-$22',
+            'verification_status' => 'verified',
+            'captured_at' => now(),
+        ]);
+
+        // Default list shows candidates
+        $response = $this->get(route('niches.index'));
+        $response->assertStatus(200);
+        $response->assertSee('Katalog Niche YouTube');
+        $response->assertSee('Cybersecurity');
+
+        // Filter by keyword search
+        $searchResponse = $this->get(route('niches.index', ['search' => 'Cybersecurity']));
+        $searchResponse->assertStatus(200);
+        $searchResponse->assertSee('Cybersecurity');
+
+        // Filter by category
+        $categoryResponse = $this->get(route('niches.index', ['category' => 'Technology']));
+        $categoryResponse->assertStatus(200);
+        $categoryResponse->assertSee('Cybersecurity');
+
+        // Creator selects Cybersecurity as pilot
+        $selectResponse = $this->post(route('niches.select', $cyber->id));
+        $selectResponse->assertRedirect();
+        $this->assertEquals('selected', $cyber->fresh()->status);
+    }
 }
 
