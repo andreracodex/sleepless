@@ -251,11 +251,14 @@ class NicheLabTest extends TestCase
             'captured_at' => now(),
         ]);
 
-        // Default list shows candidates
+        // Default list shows candidates with both Table View and Grid View
         $response = $this->get(route('niches.index'));
         $response->assertStatus(200);
         $response->assertSee('Katalog Niche YouTube');
         $response->assertSee('Cybersecurity');
+        $response->assertSee('id="tableView"', false);
+        $response->assertSee('id="gridView"', false);
+        $response->assertSee('🎯 Pilih Niche', false);
 
         // Filter by keyword search
         $searchResponse = $this->get(route('niches.index', ['search' => 'Cybersecurity']));
