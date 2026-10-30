@@ -21,12 +21,22 @@ class ScriptController extends Controller
     /**
      * Generate or view the script for a given Content Idea
      */
-    public function show(ContentIdea $idea): View
+    public function show(Request $request, ContentIdea $idea): View
     {
         $idea->load(['channel', 'researchDossier']);
         $dossier = $idea->researchDossier;
 
-        $script = Script::where('content_idea_id', $idea->id)->latest('version')->first();
+        $supportedLanguages = ScriptGenerationService::supportedLanguages();
+
+        // Support switching between versions if multiple exist
+        $version = $request->query('version');
+        if ($version) {
+            $script = Script::where('content_idea_id', $idea->id)->where('version', $version)->first();
+        } else {
+            $script = Script::where('content_idea_id', $idea->id)->latest('version')->first();
+        }
+
+        $allVersions = Script::where('content_idea_id', $idea->id)->orderBy('version', 'desc')->get();
 
         $voiceoverAsset = null;
         if ($script) {
@@ -36,22 +46,31 @@ class ScriptController extends Controller
                 ->first();
         }
 
-        return view('scripts.show', compact('idea', 'dossier', 'script', 'voiceoverAsset'));
+        return view('scripts.show', compact('idea', 'dossier', 'script', 'allVersions', 'voiceoverAsset', 'supportedLanguages'));
     }
 
     /**
-     * Trigger script generation from research dossier
+     * Trigger script generation from research dossier in chosen language & voice
      */
-    public function generate(ContentIdea $idea): RedirectResponse
+    public function generate(Request $request, ContentIdea $idea): RedirectResponse
     {
         $dossier = $idea->researchDossier;
         if (!$dossier || !$dossier->isApproved()) {
             return back()->with('error', "Naskah tidak dapat di-generate sebelum Research Dossier disetujui (PRD FR-007).");
         }
 
+        $language = $request->input('language', 'id');
+        $voice = $request->input('voice');
+
+        $supportedLanguages = ScriptGenerationService::supportedLanguages();
+        if (!array_key_exists($language, $supportedLanguages)) {
+            $language = 'id';
+        }
+
         try {
-            $script = $this->scriptService->generateScript($idea, $dossier);
-            return back()->with('success', "Naskah versi {$script->version} berhasil dibuat dengan {$script->word_count} kata dan " . count($script->script_json['scenes'] ?? []) . " adegan terstruktur.");
+            $script = $this->scriptService->generateScript($idea, $dossier, $language, $voice);
+            $langName = $supportedLanguages[$language]['name'] ?? strtoupper($language);
+            return back()->with('success', "Naskah versi v{$script->version} ({$langName}) berhasil dibuat dengan {$script->word_count} kata dan " . count($script->script_json['scenes'] ?? []) . " adegan terstruktur.");
         } catch (\Exception $e) {
             return back()->with('error', "Gagal membuat naskah: " . $e->getMessage());
         }
@@ -101,14 +120,14 @@ class ScriptController extends Controller
      */
     public function generateAudio(Request $request, Script $script): RedirectResponse
     {
-        $voice = $request->input('voice', 'en-US-ChristopherNeural');
+        $voice = $request->input('voice');
 
         try {
             $asset = $this->scriptService->generateVoiceoverAudio($script, $voice);
-            return back()->with('success', "Voiceover audio neural ({$voice}) berhasil digenerate dan disimpan ke Media Library!");
+            $chosenVoice = $asset->metadata['voice'] ?? 'Edge Neural TTS';
+            return back()->with('success', "Voiceover audio neural ({$chosenVoice}) berhasil digenerate dan disimpan ke Media Library!");
         } catch (\Exception $e) {
             return back()->with('error', "Gagal men-generate audio: " . $e->getMessage());
         }
     }
 }
-
