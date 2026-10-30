@@ -141,3 +141,4 @@ class ProductionStudioTest extends TestCase
         $this->assertNotNull($log);
     }
 }
+

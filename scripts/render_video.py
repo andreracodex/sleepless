@@ -145,3 +145,4 @@ if __name__ == "__main__":
     thumbnail = sys.argv[3] if len(sys.argv) > 3 else None
 
     render_video(manifest_file, output_mp4, thumbnail)
+

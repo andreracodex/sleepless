@@ -52,3 +52,4 @@ $uploadService = app(YouTubeUploadService::class);
 $upload = $uploadService->uploadPrivate($job);
 
 echo "2. YouTube private upload completed! Video ID: {$upload->youtube_video_id} (Privacy: {$upload->privacy_status})\n";
+

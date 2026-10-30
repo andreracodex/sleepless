@@ -207,3 +207,4 @@ class ChannelAndIdeaSeeder extends Seeder
         );
     }
 }
+

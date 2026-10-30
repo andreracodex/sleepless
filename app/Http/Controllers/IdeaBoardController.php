@@ -145,3 +145,4 @@ class IdeaBoardController extends Controller
         return back()->with('success', "Status Research Dossier #{$dossier->id} diubah menjadi '{$newStatus}'.");
     }
 }
+

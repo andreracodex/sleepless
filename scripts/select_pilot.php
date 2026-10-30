@@ -22,3 +22,4 @@ AuditLog::log(
 );
 
 echo "SUCCESS: Electric Vehicles (EV) has been selected as the Pilot Niche.\n";
+

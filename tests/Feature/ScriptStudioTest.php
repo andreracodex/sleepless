@@ -29,7 +29,7 @@ class ScriptStudioTest extends TestCase
 
         $response = $this->get(route('scripts.show', $idea->id));
         $response->assertStatus(200);
-        $response->assertSee('Script & Audio Studio', false);
+        $response->assertSee('Phase 3: Script', false);
     }
 
     public function test_script_cannot_be_generated_if_dossier_is_not_approved(): void

@@ -47,3 +47,4 @@ class YoutubeUpload extends Model
         return $this->belongsTo(Channel::class);
     }
 }
+

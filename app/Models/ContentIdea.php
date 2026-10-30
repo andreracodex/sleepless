@@ -56,3 +56,4 @@ class ContentIdea extends Model
         return $this->format === 'shorts';
     }
 }
+

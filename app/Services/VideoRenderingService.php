@@ -106,3 +106,4 @@ class VideoRenderingService
         return $job;
     }
 }
+

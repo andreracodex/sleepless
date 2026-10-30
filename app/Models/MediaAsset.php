@@ -40,3 +40,4 @@ class MediaAsset extends Model
         return $this->rights_status === 'approved' && $this->commercial_use_allowed && $this->monetization_allowed;
     }
 }
+

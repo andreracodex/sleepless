@@ -35,3 +35,4 @@ if ($dossier) {
     $audioAsset = $scriptService->generateVoiceoverAudio($script, 'en-US-ChristopherNeural');
     echo "3. Voiceover audio generated: {$audioAsset->storage_path} (Size: {$audioAsset->metadata['file_size']} bytes).\n";
 }
+

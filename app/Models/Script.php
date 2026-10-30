@@ -43,3 +43,4 @@ class Script extends Model
         return $this->status === 'approved';
     }
 }
+

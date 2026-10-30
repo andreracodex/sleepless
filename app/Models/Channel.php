@@ -39,3 +39,4 @@ class Channel extends Model
         return $this->hasMany(ContentIdea::class)->orderByDesc('created_at');
     }
 }
+

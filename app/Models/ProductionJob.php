@@ -62,3 +62,4 @@ class ProductionJob extends Model
         return $this->status === 'completed';
     }
 }
+

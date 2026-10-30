@@ -38,3 +38,4 @@ class ResearchDossier extends Model
         return $this->status === 'approved';
     }
 }
+
