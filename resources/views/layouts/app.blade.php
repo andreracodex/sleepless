@@ -11,6 +11,11 @@
             darkMode: 'class',
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        heading: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        display: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
                     colors: {
                         brand: {
                             50: '#eef2ff',
@@ -28,8 +33,31 @@
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap');
+
+        /* Small text, body, tables, buttons, inputs use Inter (clean & crisp at small sizes) */
+        body, input, select, textarea, button, p, span, td, th, label, small {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        /* Large text, headings, titles, brand, and key score metrics use Plus Jakarta Sans */
+        h1, h2, h3, h4, h5, h6,
+        .font-heading,
+        .font-display,
+        .text-lg,
+        .text-xl,
+        .text-2xl,
+        .text-3xl,
+        .text-4xl,
+        .text-5xl {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            letter-spacing: -0.025em;
+        }
+
+        /* Tabular and code elements */
+        code, pre, .font-mono {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex antialiased">

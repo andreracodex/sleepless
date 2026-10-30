@@ -155,7 +155,7 @@
                         <!-- Narrator Voiceover Text -->
                         <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
                             <span class="text-[10px] uppercase font-bold text-indigo-400 tracking-wider">🎙️ Voiceover (Narasi):</span>
-                            <p class="text-sm text-slate-200 leading-relaxed font-serif">
+                            <p class="text-sm text-slate-200 leading-relaxed italic">
                                 “{{ $scene['narrator_text'] }}”
                             </p>
                         </div>
