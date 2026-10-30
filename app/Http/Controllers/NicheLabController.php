@@ -195,3 +195,4 @@ class NicheLabController extends Controller
         return back()->with('success', "Niche [{$nicheCandidate->name}] telah resmi ditetapkan sebagai Pilot Channel oleh Owner!");
     }
 }
+

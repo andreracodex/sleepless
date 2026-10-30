@@ -38,3 +38,4 @@ class NicheEvaluationSeeder extends Seeder
         }
     }
 }
+

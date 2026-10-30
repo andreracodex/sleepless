@@ -55,3 +55,4 @@ class CaptureCollabpalsCommand extends Command
         return self::SUCCESS;
     }
 }
+

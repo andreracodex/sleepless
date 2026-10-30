@@ -67,3 +67,4 @@ class NicheScoreSnapshot extends Model
         return $this->captured_at ? $this->captured_at->diffInDays(now()) > $days : true;
     }
 }
+

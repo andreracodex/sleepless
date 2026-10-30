@@ -228,3 +228,4 @@ class NicheLabTest extends TestCase
         $this->assertEquals($ev->id, $log->entity_id);
     }
 }
+
