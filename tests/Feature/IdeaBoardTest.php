@@ -96,4 +96,31 @@ class IdeaBoardTest extends TestCase
         $log = AuditLog::where('action', 'review_research_dossier')->first();
         $this->assertNotNull($log);
     }
+
+    public function test_idea_board_dynamically_switches_to_selected_niche(): void
+    {
+        $sleep = NicheCandidate::where('slug', 'sleep-content')->firstOrFail();
+
+        \App\Models\NicheScoreSnapshot::create([
+            'niche_candidate_id' => $sleep->id,
+            'source_name' => 'CollabPals',
+            'source_url' => 'https://collabpals.com',
+            'matched_query' => 'Sleep Content',
+            'source_niche_name' => 'Sleep Content',
+            'niche_score' => 72,
+            'verification_status' => 'verified',
+            'captured_at' => now(),
+        ]);
+
+        // Select Sleep Content in Niche Lab
+        $selectResponse = $this->post(route('niches.select', $sleep->id));
+        $selectResponse->assertRedirect();
+
+        // Visit Idea Board
+        $response = $this->get(route('ideas.index'));
+        $response->assertStatus(200);
+        $response->assertSee('Sleep Content');
+        $response->assertSee('Terhubung ke Niche:');
+        $response->assertSee('8 Hours Deep Ocean Rain');
+    }
 }

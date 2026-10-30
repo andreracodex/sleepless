@@ -92,7 +92,10 @@
 
             @php
                 $activePilotNiche = \App\Models\NicheCandidate::with('latestVerifiedSnapshot')->where('status', 'selected')->first();
-                $channel = \App\Models\Channel::first();
+                $activeChannel = \App\Models\Channel::where('status', 'active')->first() ?? \App\Models\Channel::first();
+                $sidebarIdea = isset($idea) ? $idea : (\App\Models\ContentIdea::where('channel_id', $activeChannel?->id)->first() ?? \App\Models\ContentIdea::first());
+                $sidebarIdeaId = $sidebarIdea ? $sidebarIdea->id : 1;
+                $sidebarIdeasCount = $activeChannel ? $activeChannel->contentIdeas()->count() : 5;
             @endphp
             <!-- Active Channel Badge -->
             <div class="p-4 mx-3 my-3 rounded-xl bg-slate-800/70 border border-slate-700/60 shadow-sm">
@@ -101,10 +104,10 @@
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 </div>
                 <div class="font-bold text-xs text-white mt-1 truncate">
-                    {{ $activePilotNiche ? $activePilotNiche->name : ($channel->name ?? 'VoltWise: The EV Explainer') }}
+                    {{ $activeChannel ? $activeChannel->channel_name : ($activePilotNiche ? $activePilotNiche->name : 'VoltWise: The EV Explainer') }}
                 </div>
                 <div class="flex items-center justify-between text-[10px] text-slate-400 mt-0.5">
-                    <span>{{ $channel->handle ?? '@VoltWiseEV' }}</span>
+                    <span>{{ $activeChannel->handle ?? '@VoltWiseEV' }}</span>
                     <span class="text-emerald-400 font-semibold">
                         Score: {{ $activePilotNiche?->latestVerifiedSnapshot?->niche_score ?? 78 }}
                     </span>
@@ -141,10 +144,10 @@
                                 <span class="text-base">💡</span>
                                 <span>Idea Board</span>
                             </div>
-                            <span class="text-[9px] px-1.5 py-0.5 rounded {{ request()->routeIs('ideas.index') ? 'bg-indigo-700 text-white' : 'bg-slate-800 text-slate-400' }}">5 Ide</span>
+                            <span class="text-[9px] px-1.5 py-0.5 rounded {{ request()->routeIs('ideas.index') ? 'bg-indigo-700 text-white' : 'bg-slate-800 text-slate-400' }}">{{ $sidebarIdeasCount }} Ide</span>
                         </a>
 
-                        <a href="{{ route('ideas.dossier', isset($idea) ? $idea->id : 1) }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('ideas.dossier') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                        <a href="{{ route('ideas.dossier', $sidebarIdeaId) }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('ideas.dossier') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                             <div class="flex items-center gap-2.5">
                                 <span class="text-base">📑</span>
                                 <span>Research Dossier</span>
@@ -160,7 +163,7 @@
                         Production & Publish
                     </div>
                     <div class="space-y-1">
-                        <a href="{{ route('scripts.show', isset($idea) ? $idea->id : 1) }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('scripts.*') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                        <a href="{{ route('scripts.show', $sidebarIdeaId) }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('scripts.*') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                             <div class="flex items-center gap-2.5">
                                 <span class="text-base">✍️</span>
                                 <span>Script & Audio</span>

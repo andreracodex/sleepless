@@ -6,8 +6,8 @@
 @section('header_subtitle', 'Channel Pilot: ' . $channel->channel_name . ' (' . $channel->handle . ')')
 
 @section('header_actions')
-    <a href="{{ route('niches.index') }}" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition border border-slate-700">
-        ← Niche Lab
+    <a href="{{ route('niches.index') }}" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition border border-slate-700 flex items-center gap-1.5">
+        <span>🔬 Ganti Niche (Niche Lab)</span>
     </a>
     <button onclick="document.getElementById('newIdeaModal').classList.remove('hidden')" class="text-xs px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition shadow-lg shadow-indigo-600/30 flex items-center gap-1.5">
         <span>+ Buat Ide Baru</span>
@@ -20,10 +20,17 @@
     <div class="rounded-2xl p-6 bg-gradient-to-r from-slate-900 via-cyan-950/40 to-slate-900 border border-cyan-500/20 shadow-xl space-y-4">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-2">
                     <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
                         Active Pilot Channel
                     </span>
+                    @if($channel->nicheCandidate)
+                        <span class="text-xs px-2.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-semibold flex items-center gap-1">
+                            <span>🎯 Terhubung ke Niche:</span>
+                            <strong class="text-white">{{ $channel->nicheCandidate->name }}</strong>
+                            <span class="text-emerald-400 font-bold">(Skor {{ $channel->nicheCandidate->latestVerifiedSnapshot?->niche_score ?? 78 }})</span>
+                        </span>
+                    @endif
                     <span class="text-xs text-slate-400">Target Region: {{ $channel->target_region }} • Bahasa: {{ strtoupper($channel->primary_language) }}</span>
                 </div>
                 <h2 class="text-2xl font-extrabold text-white mt-1">{{ $channel->channel_name }}</h2>

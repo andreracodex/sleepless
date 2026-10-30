@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
+use App\Models\Channel;
 use App\Models\NicheCandidate;
 use App\Models\NicheEvaluation;
 use App\Models\NicheScoreSnapshot;
 use App\Services\CollabPalsCaptureService;
+use App\Services\IdeaGeneratorService;
 use App\Services\NicheEvaluationService;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\JsonResponse;
@@ -270,7 +272,7 @@ class NicheLabController extends Controller
     /**
      * Owner selection of the pilot niche
      */
-    public function select(NicheCandidate $nicheCandidate): RedirectResponse
+    public function select(NicheCandidate $nicheCandidate, IdeaGeneratorService $ideaService): RedirectResponse
     {
         $verifiedSnapshot = $nicheCandidate->latestVerifiedSnapshot;
         if (!$verifiedSnapshot) {
@@ -283,15 +285,26 @@ class NicheLabController extends Controller
         // Set other candidates as candidate
         NicheCandidate::where('id', '!=', $nicheCandidate->id)->update(['status' => 'candidate']);
 
+        // Ensure Channel and tailored ideas exist for this selected niche
+        $channel = $ideaService->ensureChannelAndIdeasForNiche($nicheCandidate);
+
+        // Activate this channel, pause others
+        Channel::where('id', '!=', $channel->id)->update(['status' => 'paused']);
+        $channel->update(['status' => 'active']);
+
         AuditLog::log(
             action: 'select_pilot_niche',
             entityType: 'NicheCandidate',
             entityId: $nicheCandidate->id,
-            after: ['status' => 'selected'],
+            after: [
+                'status' => 'selected',
+                'channel_id' => $channel->id,
+                'channel_name' => $channel->channel_name,
+            ],
             actorType: 'owner'
         );
 
-        return back()->with('success', "Niche [{$nicheCandidate->name}] telah resmi ditetapkan sebagai Pilot Channel oleh Owner!");
+        return back()->with('success', "Niche [{$nicheCandidate->name}] telah resmi ditetapkan sebagai Pilot Channel! Idea Board telah diselaraskan dengan channel '{$channel->channel_name}'.");
     }
 }
 

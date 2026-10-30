@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\AuditLog;
 use App\Models\Channel;
 use App\Models\ContentIdea;
+use App\Models\NicheCandidate;
 use App\Models\ResearchDossier;
+use App\Services\IdeaGeneratorService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -13,13 +15,28 @@ use Illuminate\View\View;
 class IdeaBoardController extends Controller
 {
     /**
-     * Display Idea Board and Content Planning dashboard
+     * Display Idea Board and Content Planning dashboard connected to the selected niche
      */
-    public function index(Request $request): View
+    public function index(Request $request, IdeaGeneratorService $ideaService): View
     {
-        $channel = Channel::with(['nicheCandidate'])
-            ->where('status', 'active')
-            ->firstOrFail();
+        // 1. Get the currently selected pilot niche (or fallback to EV)
+        $selectedNiche = NicheCandidate::with(['latestVerifiedSnapshot'])
+            ->where('status', 'selected')
+            ->first()
+            ?? NicheCandidate::where('slug', 'electric-vehicles')->first();
+
+        if (!$selectedNiche) {
+            $selectedNiche = NicheCandidate::firstOrFail();
+        }
+
+        // 2. Ensure channel & ideas are ready for this selected niche
+        $channel = $ideaService->ensureChannelAndIdeasForNiche($selectedNiche);
+
+        // Ensure this channel is marked active
+        if ($channel->status !== 'active') {
+            Channel::where('id', '!=', $channel->id)->update(['status' => 'paused']);
+            $channel->update(['status' => 'active']);
+        }
 
         $formatFilter = $request->query('format');
         $statusFilter = $request->query('status');
